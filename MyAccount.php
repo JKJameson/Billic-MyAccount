@@ -51,7 +51,7 @@ class MyAccount {
 			}
 			$billic->show_errors();
 			echo '<form method="POST"><table class="table table-striped" style="width: 200px">
-			<tr><td' . $billic->highlight('amount') . ' align="right">Amount to pay:</td><td><div class="input-group"><span class="input-group-addon">' . get_config('billic_currency_prefix') . '</span><input type="text" class="form-control" name="amount" value="' . safe($_POST['amount']) . '" style="width:100px"><span class="input-group-addon">' . get_config('billic_currency_suffix') . '</span></div></td></tr>
+			<tr><td' . $billic->highlight('amount') . ' align="right">Amount to pay:</td><td><div class="input-group"><div class="input-group-prepend"><span class="input-group-text">' . get_config('billic_currency_prefix') . '</span></div><input type="text" class="form-control" name="amount" value="' . safe($_POST['amount']) . '" style="width:100px"><div class="input-group-append"><span class="input-group-text">' . get_config('billic_currency_suffix') . '</span></div></div></td></tr>
 			<tr><td><img src="/Captcha/' . time() . '" width="150" height="75" alt="CAPTCHA"></td><td' . $billic->highlight('captcha') . '>Enter&nbsp;the&nbsp;number&nbsp;you&nbsp;see<br><input type="text" class="form-control" name="captcha" size="6" style="text-align:center;width:150px" value="' . (empty($billic->errors['captcha']) ? safe($_POST['captcha']) : '') . '" /></td></tr>
 			<tr><td colspan="2" align="center"><input type="submit" class="btn btn-success" name="addcredit" value="Generate Invoice &raquo;"></td></tr>
 			</table></form>';
@@ -95,8 +95,8 @@ class MyAccount {
 			}
 		}
 		$billic->show_errors();
-		echo '<form method="POST"><div id="myaccount_col"><div id="myaccount_col_padding">';
-		echo '<table class="table table-striped"><tr><th colspan="2">Personal Information</th></tr>';
+		echo '<div id="myaccount_col"><div id="myaccount_col_padding">';
+		echo '<table class="table table-striped"><form method="POST"><tr><th colspan="2">Personal Information <input type="submit" class="btn btn-success btn-sm float-right" name="update" value="Update &raquo;"></th></tr>';
 		echo '<tr><td>First Name</td><td><input type="text" class="form-control" name="firstname" value="' . safe($billic->user['firstname']) . '" style="width: 100%" disabled></td></tr>';
 		echo '<tr><td>Last Name</td><td><input type="text" class="form-control" name="lastname" value="' . safe($billic->user['lastname']) . '" style="width: 100%" disabled></td></tr>';
 		echo '<tr><td>Company Name</td><td><input type="text" class="form-control" name="companyname" value="' . safe($billic->user['companyname']) . '" style="width: 100%" disabled></td></tr>';
@@ -110,7 +110,7 @@ class MyAccount {
 		echo '<tr><td>Country</td><td><input type="text" class="form-control" name="country" value="' . safe($billic->user['country']) . '" style="width: 100%" disabled></td></tr>';
 		echo '<tr><td>Phone Number</td><td><input type="text" class="form-control" name="phonenumber" value="' . safe($billic->user['phonenumber']) . '" style="width: 100%" disabled></td></tr>';
 		echo '<tr><td>Password</td><td><input type="text" class="form-control" name="password" value="Edit to Change Password" onblur="if(this.value==\'\') this.value=\'Edit to Change Password\';" onFocus="if(this.value==\'Edit to Change Password\') this.value=\'\';" style="width: 100%"></td></tr>';
-		echo '</table>';
+		echo '</table></form>';
 		echo '</div></div><div id="myaccount_col"><div id="myaccount_col_padding">';
 		echo '<table class="table table-striped"><tr><th colspan="2">Account Info</th></tr>';
 		echo '<tr><td width="120">Status</td><td>';
@@ -126,22 +126,21 @@ class MyAccount {
 			break;
 		}
 		echo '</td></tr>';
-		echo '<tr><td style="vertical-align:middle">Credit</td><td><div class="col-sm-6"><div class="input-group"><span class="input-group-addon">' . get_config('billic_currency_prefix') . '</span><input type="text" class="form-control" value="' . safe($billic->user['credit']) . '" readonly><span class="input-group-addon">' . get_config('billic_currency_suffix') . '</span></div></div>';
-		if (get_config('myaccount_addfunds_enable') == 1) {
-			echo '<label class="control-label col-sm-6" style="text-align:center"><a href="/User/MyAccount/Action/AddFunds" class="btn btn-success"><i class="icon-money-banknote"></i> Add Funds</a></label>';
-		}
+		echo '<tr><td style="vertical-align:middle">Credit</td><td>' . get_config('billic_currency_prefix') . safe($billic->user['credit']) . get_config('billic_currency_suffix');
+		if (get_config('myaccount_addfunds_enable') == 1)
+			echo ' <a href="/User/MyAccount/Action/AddFunds" class="btn btn-success btn-xs">Add Funds</a>';
 		echo '</td></tr>';
 		if ($billic->module_exists('DiscountTiers')) {
 			$billic->module('DiscountTiers');
 			echo '<tr><td>Discount Tier</td><td>' . $billic->modules['DiscountTiers']->calc_discount_tier($user) . '%</td></tr>';
 		}
 		echo '</table><br>';
-		echo '<table class="table table-striped"><tr><th colspan="2">Additional Settings</th></tr>';
+		echo '<form method="POST"><table class="table table-striped"><tr><th colspan="2">Additional Settings <input type="submit" class="btn btn-success btn-sm float-right" name="update" value="Update &raquo;"></th></tr>';
 		echo '<tr><td>Auto Renew</td><td><input type="checkbox" name="auto_renew" value="1"' . ($billic->user['auto_renew'] == '1' ? ' checked' : '') . '> Automatically pay new invoices using your account credit.</td></tr>';
 		echo '<tr><td width="120">New Ticket Passphrase</td><td><input type="text" class="form-control" name="tickets_open_secret" value="' . safe($billic->user['tickets_open_secret']) . '"><br>When opening a support ticket by email, if this passphrase is set you will need to enter somewhere in your email otherwise the new ticket will be rejected.</td></tr>';
 		$billic->add_script('//cdn.ckeditor.com/4.5.9/basic/ckeditor.js');
 		echo '<tr><td>Ticket Signature</td><td><textarea name="signature" style="width:100%;height: 75px" id="signature_body">' . safe($billic->user['signature']) . '</textarea></td></tr>';
-		echo '</table><br>';
+		echo '</table></form><br>';
 		echo '<script>addLoadEvent(function() {
 	// Update message while typing (part 1)
 	key_count_global = 0; // Global variable
@@ -156,14 +155,15 @@ class MyAccount {
 			$billic->user['api_key'] = $billic->rand_str(20);
 			$db->q('UPDATE `users` SET `api_key` = ? WHERE `id` = ?', $billic->user['api_key'], $billic->user['id']);
 		}
-		echo '<table class="table table-striped"><tr><th colspan="2">API Access</th></tr>';
-		echo '<tr><td width="120">API Key</td><td><div class="input-group"><input type="text" class="form-control" value="' . safe($billic->user['api_key']) . '" readonly> <div class="input-group-addon"><input type="checkbox" name="update_api_key"> Regenerate</div></div></td></tr>';
+		echo '<form method="POST"><table class="table table-striped"><tr><th colspan="2">API Access <input type="submit" class="btn btn-success btn-sm float-right" name="update" value="Update &raquo;"></th></tr>';
+		echo '<tr><td width="120">API Key</td><td><div class="input-group"><input type="text" class="form-control" value="' . safe($billic->user['api_key']) . '" readonly> <div class="input-group-append"><span class="input-group-text"><input type="checkbox" name="update_api_key"> Regenerate</span></div></div></td></tr>';
 		echo '<tr><td>API IPs</td><td><input type="text" class="form-control" name="api_ips" value="' . safe(empty($_POST['api_ips']) ? $billic->user['api_ips'] : $_POST['api_ips']) . '" style="width: 100%"></td></tr>';
-		echo '</table>';
+		echo '</table></form>';
 		echo '</div></div>';
 		echo '<div style="clear:both"></div>';
+		echo '<form method="POST" class="form-inline">';
 		$billic->module_call_functions('MyAccount_submodule');
-		echo '<div align="center"><br><input type="submit" class="btn btn-success" name="update" value="Update My Account &raquo;"></div></form>';
+		echo '</form>';
 		echo '<div style="clear:both"></div>';
 		echo '<style>
 #myaccount_col{
