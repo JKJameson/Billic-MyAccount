@@ -66,29 +66,45 @@ class MyAccount {
 				$db->q("UPDATE `users` SET `password` = ? WHERE `id` = ?", $password, $billic->user['id']);
 				echo '<br><font color="green"><b>Password Changed!</b></font><br>';
 			}
-			if (!$billic->valid_email($_POST['email'])) {
-				$billic->error('Email is invalid', 'email');
-			}
-			if (empty($billic->errors)) {
-				$count = $db->q('SELECT COUNT(*) FROM `users` WHERE `email` = ? AND `id` != ?', $_POST['email'], $billic->user['id']);
-				if ($count[0]['COUNT(*)'] > 0) {
-					$billic->error('Email is already in use by another account', 'email');
+			if (isset($_POST['email'])) {
+				if (!$billic->valid_email($_POST['email'])) {
+					$billic->error('Email is invalid', 'email');
+				} else {
+					$count = $db->q('SELECT COUNT(*) FROM `users` WHERE `email` = ? AND `id` != ?', $_POST['email'], $billic->user['id']);
+					if ($count[0]['COUNT(*)'] > 0) {
+						$billic->error('Email is already in use by another account', 'email');
+					} else {
+						$db->q('UPDATE `users` SET `email` = ? WHERE `id` = ?', $_POST['email'], $billic->user['id']);
+					}
 				}
 			}
-			$_POST['api_ips'] = trim($_POST['api_ips']);
-			$api_ips = explode(',', $_POST['api_ips']);
-			foreach ($api_ips as $ip) {
-				$ip = trim($ip);
-				if (empty($ip)) {
-					continue;
+			if (isset($_POST['api_ips'])) {
+				$_POST['api_ips'] = trim($_POST['api_ips']);
+				$api_ips = explode(',', $_POST['api_ips']);
+				foreach ($api_ips as $ip) {
+					$ip = trim($ip);
+					if (empty($ip)) {
+						continue;
+					}
+					if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+						$billic->errors[] = 'The API IP Address "' . safe($ip) . '" is invalid. Please enter a valid IP addresses separated by commas.';
+					}
 				}
-				if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-					$billic->errors[] = 'The API IP Address "' . safe($ip) . '" is invalid. Please enter a valid IP addresses separated by commas.';
+				if (empty($billic->errors)) {
+					$db->q('UPDATE `users` SET `api_ips` = ? WHERE `id` = ?', $_POST['api_ips'], $billic->user['id']);
 				}
 			}
-			if (empty($billic->errors)) {
+			if (isset($_POST['signature'])) {
 				$signature = strip_tags($_POST['signature'], $this->settings['allowed_tags']);
-				$db->q('UPDATE `users` SET `email` = ?, `auto_renew` = ?, `tickets_open_secret` = ?, `signature` = ?, `api_ips` = ? WHERE `id` = ?', $_POST['email'], $_POST['auto_renew'], $_POST['tickets_open_secret'], $signature, $_POST['api_ips'], $billic->user['id']);
+				$db->q('UPDATE `users` SET `signature` = ? WHERE `id` = ?', $signature, $billic->user['id']);
+			}
+			if (isset($_POST['auto_renew'])) {
+				$db->q('UPDATE `users` SET `auto_renew` = ? WHERE `id` = ?', $_POST['auto_renew'], $billic->user['id']);
+			}
+			if (isset($_POST['tickets_open_secret'])) {
+				$db->q('UPDATE `users` SET `tickets_open_secret` = ? WHERE `id` = ?', $_POST['tickets_open_secret'], $billic->user['id']);
+			}
+			if (empty($billic->errors)) {
 				$billic->user = $db->q('SELECT * FROM `users` WHERE `id` = ?', $billic->user['id']);
 				$billic->user = $billic->user[0];
 				echo '<b><font color="green">Successfully Updated!</font></b>';
