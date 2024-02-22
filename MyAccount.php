@@ -28,7 +28,7 @@ class MyAccount {
 				if ($_POST['amount'] > get_config('myaccount_addfunds_max')) {
 					$billic->error('The maximum amount is ' . get_config('billic_currency_prefix') . get_config('myaccount_addfunds_max') . get_config('billic_currency_suffix') , 'amount');
 				}
-				if ($_SESSION['captcha'] != $_POST['captcha']) {
+				if (strtolower($_SESSION['captcha']) !== strtolower($_POST['captcha'])) {
 					unset($_SESSION['captcha']);
 					$billic->error('Captcha code invalid, please try again', 'captcha');
 				}
