@@ -28,7 +28,7 @@ class MyAccount {
 				if ($_POST['amount'] > get_config('myaccount_addfunds_max')) {
 					$billic->error('The maximum amount is ' . get_config('billic_currency_prefix') . get_config('myaccount_addfunds_max') . get_config('billic_currency_suffix') , 'amount');
 				}
-				if (strtolower($_SESSION['captcha']) !== strtolower($_POST['captcha'])) {
+				if (!isset($_SESSION['captcha']) || strtolower($_SESSION['captcha']) !== strtolower($_POST['captcha'])) {
 					unset($_SESSION['captcha']);
 					$billic->error('Captcha code invalid, please try again', 'captcha');
 				}
@@ -148,7 +148,7 @@ class MyAccount {
 		echo '</td></tr>';
 		if ($billic->module_exists('DiscountTiers')) {
 			$billic->module('DiscountTiers');
-			echo '<tr><td>Discount Tier</td><td>' . $billic->modules['DiscountTiers']->calc_discount_tier($user) . '%</td></tr>';
+			echo '<tr><td>Discount Tier</td><td>' . $billic->modules['DiscountTiers']->calc_discount_tier($billic->user) . '%</td></tr>';
 		}
 		echo '</table><br>';
 		echo '<form method="POST"><table class="table table-striped"><tr><th colspan="2">Additional Settings <input type="submit" class="btn btn-success btn-sm float-right" name="update" value="Update &raquo;"></th></tr>';
